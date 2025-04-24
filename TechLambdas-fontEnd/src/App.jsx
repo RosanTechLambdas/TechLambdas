@@ -1,6 +1,8 @@
 import { useState } from 'react'
+import { Routes, Route } from 'react-router-dom'
 import './App.css'
 import LoginForm from './component/LoginForm'
+import Home from './component/Home'
 
 
 function App() {
@@ -8,7 +10,10 @@ function App() {
 
   return (
     <>
-      <LoginForm/>
+      <Routes>
+      <Route path="/login" element={<LoginForm />} />
+      <Route path="/" element={<Home />} />
+    </Routes>
     </>
   )
 }
