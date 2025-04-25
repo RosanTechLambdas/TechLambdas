@@ -20,14 +20,14 @@ public class EmployeeController {
     public void postData(@RequestBody Employee employee){
             employeeService.postData(employee);
            }
-//    @PutMapping("/{id}")
-//    public void editBlog(@PathVariable int id, @RequestBody Employee employee) {
-//        System.out.println(id);
-//        employeeService.changeData(id,employee);
-//    }
+    @PutMapping("/{id}")
+    public void editBlog(@PathVariable String id, @RequestBody Employee employee) {
+        System.out.println(id);
+        employeeService.changeData(id,employee);
+    }
 
     @DeleteMapping("/{id}")
-    public void deleteBlog(@PathVariable int id) {
+    public void deleteBlog(@PathVariable String id) {
         System.out.println("id:"+id);
         employeeService.deleteData(id);
     }

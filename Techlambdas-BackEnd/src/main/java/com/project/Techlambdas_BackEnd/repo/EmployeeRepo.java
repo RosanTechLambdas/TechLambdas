@@ -7,5 +7,5 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 @Transactional
-public interface EmployeeRepo extends MongoRepository<Employee, Integer> {
+public interface EmployeeRepo extends MongoRepository<Employee, String> {
 }

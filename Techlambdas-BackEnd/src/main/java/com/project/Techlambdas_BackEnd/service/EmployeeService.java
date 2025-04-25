@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class EmployeeService {
@@ -18,19 +19,23 @@ public class EmployeeService {
     public void postData(Employee employee){
         employeeRepo.save(employee);
     }
-//
-//    public void changeData(int id, Employee employee) {
-//        Optional<Employee> employee1=employeeRepo.findById(id);
-//
-//        employee blog1=blog.get();
-//        blog1.setAuthor(blogData.getAuthor());
-//        blog1.setTitle(blogData.getTitle());
-//        blog1.setContent(blogData.getContent());
-//        System.out.println("data"+blog1);
-//        blogRepo.save(blog1);
-//    }
 
-    public void deleteData(int id) {
+    public void changeData(String id, Employee updatedEmployee) {
+        Optional<Employee> existingEmployeeOpt = employeeRepo.findById(id);
+
+            Employee existingEmployee = existingEmployeeOpt.get();
+
+            existingEmployee.setEmployeeName(updatedEmployee.getEmployeeName());
+            existingEmployee.setGender(updatedEmployee.getGender());
+            existingEmployee.setMobileNumber(updatedEmployee.getMobileNumber());
+            existingEmployee.setCity(updatedEmployee.getCity());
+            existingEmployee.setWorkType(updatedEmployee.getWorkType());
+
+            System.out.println("Updated Employee: " + existingEmployee);
+            employeeRepo.save(existingEmployee);
+    }
+
+    public void deleteData(String id) {
         employeeRepo.deleteById(id);
     }
 }
