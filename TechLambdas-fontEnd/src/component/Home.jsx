@@ -1,13 +1,17 @@
-import { FaTrash, FaEdit } from 'react-icons/fa';
+import { FaTrash, FaEdit,FaSignOutAlt } from 'react-icons/fa';
 import { useEffect, useState } from 'react';
 import { Form } from './Form';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';  
+import { useAuth } from '../AuthContext';
 
 export default function Home() {
   const [showForm, setShowForm] = useState(false);
   const [employees, setEmployees] = useState([]);
   const [editingId, setEditingId] = useState(null);
   const [editEmployee, setEditEmployee] = useState(null);
+  const navigate = useNavigate();  
+  const { logout } = useAuth();
 
   const apiUrl = 'http://localhost:8081/employee';
 
@@ -23,7 +27,7 @@ export default function Home() {
   const handleDelete = async (id) => {
     try {
       await axios.delete(`${apiUrl}/${id}`);
-      fetchEmployees();
+      setEmployees((prevEmployees) => prevEmployees.filter((emp) => emp.id !== id)); // Remove from state
     } catch (error) {
       console.error('Failed to delete employee:', error);
     }
@@ -46,6 +50,7 @@ export default function Home() {
       [name]: value,
     }));
   };
+
   const handleAddNewClick = () => {
     setEditEmployee(null);
     setShowForm(true);
@@ -53,12 +58,31 @@ export default function Home() {
 
   const handleCloseForm = () => {
     setShowForm(false);
-    fetchEmployees(); 
+    fetchEmployees();  
   };
-
   const handleSaveEdit = async () => {
+    const mobile = editEmployee.mobileNumber;
+  
+    if (!editEmployee.employeeName || !mobile || !editEmployee.gender || !editEmployee.workType) {
+      alert('Please fill out all required fields.');
+      return;
+    }
+    
+    if (!/^\+91\s[0-9]{10}$/.test(mobile)) {
+      alert('Invalid mobile number format');
+      return;
+    }    
+  
+    const formattedEmployee = {
+      ...editEmployee,
+      mobileNumber: mobile.startsWith('+91') ? mobile : `+91${mobile}`,
+      city: editEmployee.city && editEmployee.city.trim().length === 0
+        ? 'NA'
+        : editEmployee.city || 'NA',
+    };
+  
     try {
-      await axios.put(`${apiUrl}/${editingId}`, editEmployee);
+      await axios.put(`${apiUrl}/${editingId}`, formattedEmployee);
       setEditingId(null);
       setEditEmployee(null);
       fetchEmployees();
@@ -66,10 +90,16 @@ export default function Home() {
       console.error('Failed to update employee:', error);
     }
   };
+  
 
   useEffect(() => {
     fetchEmployees();
   }, []);
+
+  const handleLogout = () => {
+    logout();
+    navigate('/'); 
+  };
 
   return (
     <div className="relative flex h-screen font-['DM Sans']">
@@ -80,8 +110,15 @@ export default function Home() {
       </aside>
 
       <main className="flex-1 bg-white relative overflow-hidden">
-        <div className="bg-white mb-10 p-6 border shadow-sm">
+      <div className="bg-white mb-10 p-6 border shadow-sm flex justify-between items-center">
           <h2 className="text-[20px] font-bold text-[#1FCB4F]">Employee View</h2>
+          <button
+            onClick={handleLogout}
+            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 flex items-center gap-2"
+          >
+            <FaSignOutAlt /> 
+        
+          </button>
         </div>
         <div className="flex justify-between items-center mb-4 px-6">
           <h3 className="font-medium text-gray-600">All Employee</h3>
@@ -91,6 +128,7 @@ export default function Home() {
           >
             + Add New
           </button>
+          
         </div>
         <div className="overflow-x-auto px-[60px]">
           <table className="w-full border-collapse">
@@ -99,7 +137,7 @@ export default function Home() {
                 <th className="text-left p-4">S.No</th>
                 <th className="text-left p-4">Employee Name</th>
                 <th className="text-left p-4">Mobile Number</th>
-                <th className="text-left p-4">City</th>
+                <th className="text-left p-4">Location</th>
                 <th className="text-left p-4">Gender</th>
                 <th className="text-left p-4">Work Type</th>
                 <th className="text-left p-4">Action</th>
@@ -124,15 +162,21 @@ export default function Home() {
                             value={editEmployee.employeeName}
                             onChange={handleChangeInTable}
                             className="border p-1 rounded"
+                            required
                           />
                         </td>
                         <td className="p-4">
-                          <input
-                            name="mobileNumber"
-                            value={editEmployee.mobileNumber}
-                            onChange={handleChangeInTable}
-                            className="border p-1 rounded"
-                          />
+                        <input
+                          name="mobileNumber"
+                          value={editEmployee.mobileNumber.trim().length === 3 ? "+91 " : editEmployee.mobileNumber}
+                          onChange={handleChangeInTable}
+                          className="border p-1 rounded"
+                          maxLength="14"
+                          required
+                          type="tel"  
+                          inputMode="numeric" 
+                          
+                        />
                         </td>
                         <td className="p-4">
                           <input
@@ -160,10 +204,13 @@ export default function Home() {
                             value={editEmployee.workType}
                             onChange={handleChangeInTable}
                             className="border p-1 rounded"
+                            required
                           >
                             <option value="">Select</option>
-                            <option value="Cleaning">Cleaning</option>
                             <option value="Receptionist">Receptionist</option>
+                            <option value="Developer">Developer</option>
+                            <option value="Tester">Tester</option>
+                            <option value="DevOps">DevOps</option>
                           </select>
                         </td>
                         <td className="p-4 flex gap-2">
@@ -179,7 +226,7 @@ export default function Home() {
                       <>
                         <td className="p-4">{emp.employeeName}</td>
                         <td className="p-4">{emp.mobileNumber}</td>
-                        <td className="p-4">{emp.city}</td>
+                        <td className="p-4">{emp.city ? emp.city : 'NA'}</td>
                         <td className="p-4">{emp.gender}</td>
                         <td className="p-4">{emp.workType}</td>
                         <td className="p-4 flex gap-3">

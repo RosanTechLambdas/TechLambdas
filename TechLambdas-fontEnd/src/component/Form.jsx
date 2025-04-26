@@ -4,8 +4,8 @@ import axios from 'axios';
 export const Form = ({ onClose }) => {
   const [employee, setEmployee] = useState({
     employeeName: '',
-    mobileNumber: '+91 ', 
-    city: 'null', 
+    mobileNumber: '',
+    city: '',
     gender: '',
     workType: ''
   });
@@ -14,14 +14,42 @@ export const Form = ({ onClose }) => {
 
   const apiUrl = 'http://localhost:8081/employee';
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setEmployee({ ...employee, [name]: value });
+  const validateMobileNumber = (mobileNumber) => {
+    const repeatedPattern = /^(\d)\1{9}$/;
+    if (!/^\+91\s[0-9]{10}$/.test(mobileNumber)) {
+      alert('Invalid mobile number format.');
+      return false;
+    }
+    if (repeatedPattern.test(mobileNumber.substring(4))) {
+      alert('Mobile number cannot contain repetitive digits like 1111111111.');
+      return false;
+    }
+    return true;
   };
 
-  const validateRepetitiveNumber = (mobileNumber) => {
-    const repeatedPattern = /^(.)\1{9}$/; 
-    return !repeatedPattern.test(mobileNumber.substring(4));
+  const formatMobileNumber = (mobileNumber, setEmployee) => {
+    let input = mobileNumber;
+    if (!input.startsWith("+91 ")) {
+      input = "+91 " + input.replace(/^\+91\s*/, ""); 
+    }
+    const numberPart = input.slice(4).replace(/\D/g, ""); 
+    const finalInput = "+91 " + numberPart;
+
+    if (numberPart.length <= 10) {
+      setEmployee((prev) => ({
+        ...prev,
+        mobileNumber: finalInput,
+      }));
+    }
+  };
+
+  const handleClick = (employee, setEmployee) => {
+    if (employee.mobileNumber.length === 0) {
+      setEmployee((prev) => ({
+        ...prev,
+        mobileNumber: "+91 ",
+      }));
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -32,8 +60,7 @@ export const Form = ({ onClose }) => {
       return;
     }
 
-    if (!validateRepetitiveNumber(employee.mobileNumber)) {
-      setErrorMessage('Mobile number cannot contain repetitive digits like 1111111111 or 9999999999.');
+    if (!validateMobileNumber(employee.mobileNumber)) {
       return;
     }
 
@@ -64,43 +91,47 @@ export const Form = ({ onClose }) => {
 
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label className="block text-gray-700">Employee Name</label>
+            <label className="block text-gray-700">Employee Name<span className="text-red-500">*</span></label>
             <input
               className="w-full px-4 py-2 border rounded-md"
               type="text"
               name="employeeName"
+              placeholder="ex: rosan"
               value={employee.employeeName}
-              onChange={handleChange}
+              onChange={(e) => setEmployee({ ...employee, employeeName: e.target.value })}
               required
             />
           </div>
-
+      
           <div className="mb-4">
-            <label className="block text-gray-700">Mobile Number</label>
+            <label className="block text-gray-700">Mobile Number<span className="text-red-500">*</span></label>
             <input
               className="w-full px-4 py-2 border rounded-md"
               type="text"
               name="mobileNumber"
+              placeholder="+91 9025682686"
               value={employee.mobileNumber}
-              onChange={handleChange}
+              onChange={(e) => formatMobileNumber(e.target.value, setEmployee)} 
+              onClick={() => handleClick(employee, setEmployee)} 
               required
-              maxLength="14" 
+              maxLength="14"
             />
           </div>
 
           <div className="mb-4">
-            <label className="block text-gray-700">City (Optional)</label>
+            <label className="block text-gray-700">Location</label>
             <input
               className="w-full px-4 py-2 border rounded-md"
               type="text"
               name="city"
+              placeholder="Tirunelveli"
               value={employee.city}
-              onChange={handleChange}
+              onChange={(e) => setEmployee({ ...employee, city: e.target.value })}
             />
           </div>
 
           <div className="mb-4">
-            <label className="block text-gray-700 mb-1">Gender</label>
+            <label className="block text-gray-700 mb-1">Gender<span className="text-red-500">*</span></label>
             <div className="flex gap-4">
               <label className="flex items-center">
                 <input
@@ -108,7 +139,7 @@ export const Form = ({ onClose }) => {
                   name="gender"
                   value="Male"
                   checked={employee.gender === 'Male'}
-                  onChange={handleChange}
+                  onChange={(e) => setEmployee({ ...employee, gender: e.target.value })}
                   className="mr-2"
                   required
                 />
@@ -120,7 +151,7 @@ export const Form = ({ onClose }) => {
                   name="gender"
                   value="Female"
                   checked={employee.gender === 'Female'}
-                  onChange={handleChange}
+                  onChange={(e) => setEmployee({ ...employee, gender: e.target.value })}
                   className="mr-2"
                   required
                 />
@@ -130,17 +161,19 @@ export const Form = ({ onClose }) => {
           </div>
 
           <div className="mb-4">
-            <label className="block text-gray-700 mb-1">Work Type</label>
+            <label className="block text-gray-700 mb-1">Work Type<span className="text-red-500">*</span></label>
             <select
               name="workType"
               value={employee.workType}
-              onChange={handleChange}
+              onChange={(e) => setEmployee({ ...employee, workType: e.target.value })}
               className="w-full px-4 py-2 border rounded-md"
               required
             >
               <option value="">Select Work Type</option>
-              <option value="Cleaning">Cleaning</option>
               <option value="Receptionist">Receptionist</option>
+              <option value="Developer">Developer</option>
+              <option value="Tester">Tester</option>
+              <option value="DevOps">DevOps</option>
             </select>
           </div>
 

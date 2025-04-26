@@ -2,8 +2,11 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom'; 
 import axios from 'axios';
 import loginImg from '../image/login-page.png';
+import { useAuth } from '../AuthContext';
+
 
 export default function LoginPage() {
+  const { login } = useAuth();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate(); 
@@ -19,6 +22,7 @@ export default function LoginPage() {
 
       if (response.status === 200) {
         console.log('Login successful:', response.data);
+        login();
         navigate('/home'); 
         console.error('Login failed:', response);
       }

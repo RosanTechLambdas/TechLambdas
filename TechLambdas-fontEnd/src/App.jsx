@@ -1,21 +1,25 @@
-import { useState } from 'react'
-import { Routes, Route } from 'react-router-dom'
-import './App.css'
-import LoginForm from './component/LoginForm'
-import Home from './component/Home'
-
+import {  Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './AuthContext';
+import PrivateRoute from './PrivateRoute';
+import Home from './component/Home';
+import Login from './component/LoginForm';
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <Routes>
-      <Route path="/" element={<LoginForm />} />
-      <Route path="/home" element={<Home />} />
-    </Routes>
-    </>
-  )
+    <AuthProvider>
+        <Routes>
+          <Route path="/" element={<Login />} />
+          <Route 
+            path="/home" 
+            element={
+              <PrivateRoute>
+                <Home />
+              </PrivateRoute>
+            } 
+          />
+        </Routes>
+    </AuthProvider>
+  );
 }
 
-export default App
+export default App;
