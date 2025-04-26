@@ -24,7 +24,6 @@ export default function LoginPage() {
         console.log('Login successful:', response.data);
         login();
         navigate('/home'); 
-        console.error('Login failed:', response);
       }
     } catch (error) {
       console.error('Login error:', error);
