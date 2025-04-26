@@ -21,7 +21,13 @@ public class SecurityConfig {
         InMemoryUserDetailsManager manager = new InMemoryUserDetailsManager();
         manager.createUser(
                 User.withUsername("admin")
-                        .password("{noop}admin123") // {noop} means no password encoding
+                        .password("{noop}admin123")
+                        .roles("ADMIN")
+                        .build()
+        );
+        manager.createUser(
+                User.withUsername("TechLambdas")
+                        .password("{noop}TechLambdas123")
                         .roles("ADMIN")
                         .build()
         );
@@ -32,7 +38,7 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/sign", "/login","/blog","/blog/**").permitAll()
+                        .requestMatchers("/sign", "/login","/employee","/employee/**").permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         return http.build();

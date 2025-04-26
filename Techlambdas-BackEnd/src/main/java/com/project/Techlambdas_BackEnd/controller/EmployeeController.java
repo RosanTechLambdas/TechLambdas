@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("blog")
+@RequestMapping("employee")
 public class EmployeeController {
     @Autowired private EmployeeService employeeService;
     @GetMapping
