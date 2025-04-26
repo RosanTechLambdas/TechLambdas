@@ -1,37 +1,88 @@
 import { FaTrash, FaEdit } from 'react-icons/fa';
-import { useState } from 'react';
-
-const employees = [
-  { id: 1, name: 'Ajith Kumar', mobile: '+91 9876543456', city: 'Kovilpatti', gender: 'Male', work: 'Cleaning' },
-  { id: 2, name: 'Peter John', mobile: '+91 6754378908', city: 'Satur', gender: 'Male', work: 'Cleaning' },
-  { id: 3, name: 'Prasath', mobile: '+91 7678654389', city: 'Tirunelveli', gender: 'Male', work: 'Receptionist' },
-  { id: 4, name: 'Yuvaraj', mobile: '+91 5678907530', city: 'Sivagsai', gender: 'Male', work: 'Receptionist' },
-  { id: 5, name: 'Karthik', mobile: '+91 7865439876', city: 'Kovilpatti', gender: 'Male', work: 'Receptionist' },
-  { id: 6, name: 'Senthil', mobile: '+91 6789765423', city: 'Sangarankovil', gender: 'Male', work: 'Cleaning' },
-];
+import { useEffect, useState } from 'react';
+import { Form } from './Form';
+import axios from 'axios';
 
 export default function Home() {
   const [showForm, setShowForm] = useState(false);
+  const [employees, setEmployees] = useState([]);
+  const [editingId, setEditingId] = useState(null);
+  const [editEmployee, setEditEmployee] = useState(null);
 
+  const apiUrl = 'http://localhost:8081/employee';
+
+  const fetchEmployees = async () => {
+    try {
+      const response = await axios.get(apiUrl);
+      setEmployees(response.data);
+    } catch (error) {
+      console.error('Failed to fetch employees:', error);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await axios.delete(`${apiUrl}/${id}`);
+      fetchEmployees();
+    } catch (error) {
+      console.error('Failed to delete employee:', error);
+    }
+  };
+
+  const handleEdit = (employee) => {
+    setEditingId(employee.id);
+    setEditEmployee({ ...employee });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setEditEmployee(null);
+  };
+
+  const handleChangeInTable = (e) => {
+    const { name, value } = e.target;
+    setEditEmployee((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
   const handleAddNewClick = () => {
+    setEditEmployee(null);
     setShowForm(true);
   };
 
   const handleCloseForm = () => {
     setShowForm(false);
+    fetchEmployees(); 
   };
+
+  const handleSaveEdit = async () => {
+    try {
+      await axios.put(`${apiUrl}/${editingId}`, editEmployee);
+      setEditingId(null);
+      setEditEmployee(null);
+      fetchEmployees();
+    } catch (error) {
+      console.error('Failed to update employee:', error);
+    }
+  };
+
+  useEffect(() => {
+    fetchEmployees();
+  }, []);
 
   return (
     <div className="relative flex h-screen font-['DM Sans']">
       <aside className="bg-[#1A1A40] text-white w-64 p-6 pt-10">
-        <h1 className="text-2xl font-bold text-green-500">Tech<span className="text-white">Lambdas</span></h1>
+        <h1 className="text-2xl font-bold text-green-500">
+          Tech<span className="text-white">Lambdas</span>
+        </h1>
       </aside>
 
       <main className="flex-1 bg-white relative overflow-hidden">
         <div className="bg-white mb-10 p-6 border shadow-sm">
           <h2 className="text-[20px] font-bold text-[#1FCB4F]">Employee View</h2>
         </div>
-
         <div className="flex justify-between items-center mb-4 px-6">
           <h3 className="font-medium text-gray-600">All Employee</h3>
           <button
@@ -41,10 +92,9 @@ export default function Home() {
             + Add New
           </button>
         </div>
-
         <div className="overflow-x-auto px-[60px]">
           <table className="w-full border-collapse">
-            <thead className=" text-gray-700">
+            <thead className="text-gray-700">
               <tr>
                 <th className="text-left p-4">S.No</th>
                 <th className="text-left p-4">Employee Name</th>
@@ -56,80 +106,106 @@ export default function Home() {
               </tr>
             </thead>
             <tbody>
-              {employees.map((emp, index) => (
-                <tr key={emp.id} className={`${index % 2 === 0 ? 'bg-[#F7F6FE]' : 'bg-white'}`}>
-                  <td className="p-4">{index + 1}</td>
-                  <td className="p-4">{emp.name}</td>
-                  <td className="p-4">{emp.mobile}</td>
-                  <td className="p-4">{emp.city}</td>
-                  <td className="p-4">{emp.gender}</td>
-                  <td className="p-4">{emp.work}</td>
-                  <td className="p-4 flex gap-3">
-                    <button className="text-purple-600 hover:text-purple-800">
-                      <FaEdit />
-                    </button>
-                    <button className="text-red-600 hover:text-red-800">
-                      <FaTrash />
-                    </button>
+              {employees.length === 0 ? (
+                <tr>
+                  <td colSpan="7" className="text-center p-4 text-gray-500">
+                    No employee is available
                   </td>
                 </tr>
-              ))}
+              ) : (
+                employees.map((emp, index) => (
+                  <tr key={emp.id} className={`${index % 2 === 0 ? 'bg-[#F7F6FE]' : 'bg-white'}`}>
+                    <td className="p-4">{index + 1}</td>
+                    {editingId === emp.id ? (
+                      <>
+                        <td className="p-4">
+                          <input
+                            name="employeeName"
+                            value={editEmployee.employeeName}
+                            onChange={handleChangeInTable}
+                            className="border p-1 rounded"
+                          />
+                        </td>
+                        <td className="p-4">
+                          <input
+                            name="mobileNumber"
+                            value={editEmployee.mobileNumber}
+                            onChange={handleChangeInTable}
+                            className="border p-1 rounded"
+                          />
+                        </td>
+                        <td className="p-4">
+                          <input
+                            name="city"
+                            value={editEmployee.city}
+                            onChange={handleChangeInTable}
+                            className="border p-1 rounded"
+                          />
+                        </td>
+                        <td className="p-4">
+                          <select
+                            name="gender"
+                            value={editEmployee.gender}
+                            onChange={handleChangeInTable}
+                            className="border p-1 rounded"
+                          >
+                            <option value="">Select</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                          </select>
+                        </td>
+                        <td className="p-4">
+                          <select
+                            name="workType"
+                            value={editEmployee.workType}
+                            onChange={handleChangeInTable}
+                            className="border p-1 rounded"
+                          >
+                            <option value="">Select</option>
+                            <option value="Cleaning">Cleaning</option>
+                            <option value="Receptionist">Receptionist</option>
+                          </select>
+                        </td>
+                        <td className="p-4 flex gap-2">
+                          <button onClick={handleSaveEdit} className="text-green-600 hover:text-green-800">
+                            Save
+                          </button>
+                          <button onClick={handleCancelEdit} className="text-gray-600 hover:text-gray-800">
+                            Cancel
+                          </button>
+                        </td>
+                      </>
+                    ) : (
+                      <>
+                        <td className="p-4">{emp.employeeName}</td>
+                        <td className="p-4">{emp.mobileNumber}</td>
+                        <td className="p-4">{emp.city}</td>
+                        <td className="p-4">{emp.gender}</td>
+                        <td className="p-4">{emp.workType}</td>
+                        <td className="p-4 flex gap-3">
+                          <button
+                            className="text-purple-600 hover:text-purple-800"
+                            onClick={() => handleEdit(emp)}
+                          >
+                            <FaEdit />
+                          </button>
+                          <button
+                            className="text-red-600 hover:text-red-800"
+                            onClick={() => handleDelete(emp.id)}
+                          >
+                            <FaTrash />
+                          </button>
+                        </td>
+                      </>
+                    )}
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
-
-        {/* Overlay Form */}
         {showForm && (
-        <div className="absolute inset-0 bg-black bg-opacity-30 flex justify-end z-10  ">
-            <div className="bg-white rounded-lg shadow-lg w-[400px] h-[765px] mt-2 mr-2 p-6 relative">
-              <button
-                onClick={handleCloseForm}
-                className="absolute top-2 right-3 text-gray-500 hover:text-red-600 text-xl font-bold"
-              >
-                ×
-              </button>
-              <h3 className="font-bold text-xl text-gray-700 mb-4">Add New Employee</h3>
-             <form >
-                <div className="mb-4">
-                <label className="block text-gray-700">Employee Name</label>
-                <input className="w-full px-4 py-2 border rounded-md" type="text" />
-                </div>
-                <div className="mb-4">
-                <label className="block text-gray-700">Mobile Number</label>
-                <input className="w-full px-4 py-2 border rounded-md" type="text" />
-                </div>
-                <div className="mb-4">
-                <label className="block text-gray-700">City</label>
-                <input className="w-full px-4 py-2 border rounded-md" type="text" />
-                </div>
-                <div className="mb-4">
-                <label className="block text-gray-700 mb-1">Gender</label>
-                <div className="flex gap-4">
-                    <label className="flex items-center">
-                    <input type="radio" name="gender" value="Male" className="mr-2" />
-                    Male
-                    </label>
-                    <label className="flex items-center">
-                    <input type="radio" name="gender" value="Female" className="mr-2" />
-                    Female
-                    </label>
-                </div>
-                </div>
-                <div className="mb-4">
-                <label className="block text-gray-700 mb-1">Work Type</label>
-                <select className="w-full px-4 py-2 border rounded-md">
-                    <option value="">Select Work Type</option>
-                    <option value="Cleaning">Cleaning</option>
-                    <option value="Receptionist">Receptionist</option>
-                </select>
-                </div>
-
-                <button className="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600">
-                Save
-                </button>
-            </form>
-            </div>
-          </div>
+          <Form onClose={handleCloseForm} initialData={editEmployee} />
         )}
       </main>
     </div>
