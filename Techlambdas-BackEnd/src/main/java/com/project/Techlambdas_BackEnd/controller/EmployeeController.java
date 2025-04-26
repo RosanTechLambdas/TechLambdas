@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("employee")
@@ -18,7 +19,9 @@ public class EmployeeController {
 
     @PostMapping
     public void postData(@RequestBody Employee employee){
+           employee.setId(UUID.randomUUID().toString());
             employeeService.postData(employee);
+            System.out.println("Employee added successfully");
            }
     @PutMapping("/{id}")
     public void editBlog(@PathVariable String id, @RequestBody Employee employee) {
