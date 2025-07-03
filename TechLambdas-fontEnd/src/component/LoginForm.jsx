@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom'; 
 import axios from 'axios';
-import loginImg from '../image/login-page.png';
+import loginImg from '../../Image/login-page.png';
 import { useAuth } from '../AuthContext';
 
 
