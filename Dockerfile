@@ -14,7 +14,6 @@ WORKDIR /app/Techlambdas-backend
 COPY --from=frontend /app/Techlambdas-fontEnd/build ./src/main/resources/static
 RUN mvn clean package -DskipTests
 
-# Stage 3: Final JDK image to run the app
 FROM eclipse-temurin:17-jdk
 WORKDIR /app
 COPY --from=backend /app/Techlambdas-backend/target/*.jar app.jar
