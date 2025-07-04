@@ -10,7 +10,6 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {
-        // Fallback route for SPA to forward any unmatched paths to index.html
         registry.addViewController("/{spring:[a-zA-Z0-9-_]+}")
                 .setViewName("forward:/index.html");
         registry.addViewController("/**/{spring:[a-zA-Z0-9-_]+}")
