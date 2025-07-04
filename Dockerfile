@@ -10,13 +10,9 @@ FROM maven:3.9-eclipse-temurin-17 AS backend
 WORKDIR /app
 COPY Techlambdas-BackEnd/ ./Techlambdas-BackEnd
 WORKDIR /app/Techlambdas-BackEnd
-
-# Copy React build into Spring Boot's static folder
 COPY --from=frontend /app/TechLambdas-fontEnd/dist ./src/main/resources/static
-
 RUN mvn clean package -DskipTests
 
-# Stage 3: Final run
 FROM eclipse-temurin:17-jdk
 WORKDIR /app
 COPY --from=backend /app/Techlambdas-BackEnd/target/*.jar app.jar
