@@ -13,7 +13,7 @@ export default function Home() {
   const navigate = useNavigate();  
   const { logout } = useAuth();
 
-  const apiUrl = 'http://localhost:8081/employee';
+  const apiUrl = 'https://techlambdas.onrender.com/employee';
 
   const fetchEmployees = async () => {
     try {

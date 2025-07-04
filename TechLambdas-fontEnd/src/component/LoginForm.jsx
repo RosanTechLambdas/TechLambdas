@@ -15,7 +15,7 @@ export default function LoginPage() {
     e.preventDefault();
 
     try {
-      const response = await axios.post('http://localhost:8081/login', {
+      const response = await axios.post('https://techlambdas.onrender.com/login', {
         username,
         password,
       });

@@ -12,7 +12,7 @@ export const Form = ({ onClose }) => {
   
   const [errorMessage, setErrorMessage] = useState('');
 
-  const apiUrl = 'http://localhost:8081/employee';
+  const apiUrl = 'https://techlambdas.onrender.com/employee';
 
   const validateMobileNumber = (mobileNumber) => {
     const repeatedPattern = /^(\d)\1{9}$/;
