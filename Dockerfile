@@ -1,24 +1,22 @@
-# Stage 1: React build
-FROM node:20 AS frontend
-WORKDIR /app
-COPY TechLambdas-fontEnd/ ./TechLambdas-fontEnd
+# Stage 1: Build React App
+FROM node:18 AS frontend
 WORKDIR /app/TechLambdas-fontEnd
-RUN npm install && npm run build
+COPY TechLambdas-fontEnd/package*.json ./
+RUN npm install
+COPY TechLambdas-fontEnd .
+RUN npm run build
 
-# Stage 2: Spring Boot build
-FROM maven:3.9-eclipse-temurin-17 AS backend
-WORKDIR /app
-COPY Techlambdas-BackEnd/ ./Techlambdas-BackEnd
+# Stage 2: Build Spring Boot App
+FROM maven:3.9.3-eclipse-temurin-17 AS backend
 WORKDIR /app/Techlambdas-BackEnd
-
-# Copy React build into Spring Boot's static folder
-COPY --from=frontend /app/TechLambdas-fontEnd/dist ./src/main/resources/static
-
+COPY Techlambdas-BackEnd/pom.xml ./
+RUN mvn dependency:go-offline
+COPY Techlambdas-BackEnd .
+COPY --from=frontend /app/TechLambdas-fontEnd/dist/ ./src/main/resources/static/
 RUN mvn clean package -DskipTests
 
-# Stage 3: Final run
+# Stage 3: Run
 FROM eclipse-temurin:17-jdk
 WORKDIR /app
 COPY --from=backend /app/Techlambdas-BackEnd/target/*.jar app.jar
-EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "app.jar"]
