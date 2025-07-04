@@ -18,7 +18,6 @@ import java.util.Map;
 public class UserController {
 
     @Autowired private AuthenticationManager authenticationManager;
-    @Autowired private EmployeeService employeeService;
 
 
     @PostMapping("login")
@@ -38,5 +37,4 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid username or password");
         }
     }
-    
 }
