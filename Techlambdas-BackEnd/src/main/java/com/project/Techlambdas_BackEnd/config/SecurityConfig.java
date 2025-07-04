@@ -38,16 +38,22 @@ public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Excepti
     http
         .csrf(csrf -> csrf.disable())
         .authorizeHttpRequests(auth -> auth
-            .requestMatchers(
-                "/sign",
-                "/login",
-                "/employee",
-                "/employee/**",
-                "/",                        
-                "/index.html",               
-                "/static/**",                
-                "/**/*.js", "/**/*.css", "/**/*.png", "/**/*.jpg", "/**/*.svg"
-            ).permitAll()
+        .requestMatchers(
+                "/", 
+                "/index.html", 
+                "/assets/**", 
+                "/static/**", 
+                "/**/*.js", 
+                "/**/*.css", 
+                "/**/*.png", 
+                "/**/*.jpg", 
+                "/**/*.svg", 
+                "/login", 
+                "/sign", 
+                "/employee", 
+                "/employee/**"
+            )
+            .permitAll()
             .anyRequest().authenticated()
         )
         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
